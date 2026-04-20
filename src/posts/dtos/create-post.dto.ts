@@ -3,7 +3,6 @@ import {
   IsArray,
   IsDate,
   IsEnum,
-  IsISO8601,
   IsInt,
   IsJSON,
   IsNotEmpty,
@@ -11,17 +10,12 @@ import {
   IsString,
   IsUrl,
   Matches,
-  Max,
   MaxLength,
-  Min,
   MinLength,
   ValidateNested,
-  isNotEmpty,
 } from 'class-validator';
 
 import { CreatePostMetaOptionsDto } from '../../meta-options/dtos/create-post-meta-options.dto';
-import { CreateTagDto } from 'src/tags/dtos/create-tag.dto';
-import { DeepPartial } from 'typeorm';
 import { Type } from 'class-transformer';
 import { postStatus } from '../enums/postStatus.enum';
 import { postType } from '../enums/postType.enum';
@@ -129,11 +123,4 @@ export class CreatePostDto {
   @Type(() => CreatePostMetaOptionsDto)
   metaOptions?: CreatePostMetaOptionsDto | null;
 
-  @ApiProperty({
-    description: 'The id of the author of the post',
-    example: 1,
-  })
-  @IsInt()
-  @IsNotEmpty()
-  authorId: number;
 }

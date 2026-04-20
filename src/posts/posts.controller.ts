@@ -46,11 +46,13 @@ export class PostsController {
     status: 201,
     description: 'You get a 201 response if your post is created successfully',
   })
+  @UseGuards(AccessTokenGuard)
   @Post()
   public createPost(
+    @ActiveUser('sub') userId: number,
     @Body() createPostDto: CreatePostDto,
   ) {
-    return this.postsService.create(createPostDto, createPostDto.authorId);
+    return this.postsService.create(createPostDto, userId);
   }
 
   @ApiOperation({

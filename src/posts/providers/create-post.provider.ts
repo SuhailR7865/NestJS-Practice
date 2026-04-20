@@ -31,18 +31,19 @@ export class CreatePostProvider {
 
   public async create(createPostDto: CreatePostDto, authorId: number) {
     let author = undefined;
-    let tags = undefined;
+    let tags = [];
+    const tagIds = createPostDto.tags ?? [];
 
     try {
       // Find author from database based on authorId
       author = await this.usersService.findOneById(authorId);
       // Find tags
-      tags = await this.tagsService.findMultipleTags(createPostDto.tags);
+      tags = await this.tagsService.findMultipleTags(tagIds);
     } catch (error) {
       throw new ConflictException(error);
     }
 
-    if (createPostDto.tags.length !== tags.length) {
+    if (tagIds.length !== tags.length) {
       throw new BadRequestException('Please check your tag Ids');
     }
 
