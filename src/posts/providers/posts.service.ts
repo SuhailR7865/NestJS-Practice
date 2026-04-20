@@ -54,17 +54,42 @@ export class PostsService {
 
   public async findAll(
     postQuery: GetPostsDto,
-    userId: string,
+    userId: number,
   ): Promise<Paginated<Post>> {
-    let posts = await this.paginationProvider.paginateQuery(
-      {
-        limit: postQuery.limit,
-        page: postQuery.page,
+    const [results, totalItems] = await this.postsRepository.findAndCount({
+      where: {
+        author: {
+          id: userId,
+        },
       },
-      this.postsRepository,
-    );
+      skip: (postQuery.page - 1) * postQuery.limit,
+      take: postQuery.limit,
+      order: {
+        id: 'DESC',
+      },
+    });
 
-    return posts;
+    const totalPages = Math.max(1, Math.ceil(totalItems / postQuery.limit));
+    const nextPage =
+      postQuery.page >= totalPages ? totalPages : postQuery.page + 1;
+    const previousPage = postQuery.page <= 1 ? 1 : postQuery.page - 1;
+
+    return {
+      data: results,
+      meta: {
+        itemsPerPage: postQuery.limit,
+        totalItems,
+        currentPage: postQuery.page,
+        totalPages,
+      },
+      links: {
+        first: `/posts?limit=${postQuery.limit}&page=1`,
+        last: `/posts?limit=${postQuery.limit}&page=${totalPages}`,
+        current: `/posts?limit=${postQuery.limit}&page=${postQuery.page}`,
+        next: `/posts?limit=${postQuery.limit}&page=${nextPage}`,
+        previous: `/posts?limit=${postQuery.limit}&page=${previousPage}`,
+      },
+    };
   }
 
   public async update(patchPostDto: PatchPostDto) {

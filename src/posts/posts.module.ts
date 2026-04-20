@@ -8,6 +8,9 @@ import { TagsModule } from 'src/tags/tags.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from 'src/users/users.module';
 import { CreatePostProvider } from './providers/create-post.provider';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import jwtConfig from 'src/auth/config/jwt.config';
 
 @Module({
   controllers: [PostsController],
@@ -16,6 +19,18 @@ import { CreatePostProvider } from './providers/create-post.provider';
     UsersModule,
     TagsModule,
     PaginationModule,
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync({
+      imports: [ConfigModule.forFeature(jwtConfig)],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('jwt.secret'),
+        signOptions: {
+          audience: configService.get('jwt.audience'),
+          issuer: configService.get('jwt.issuer'),
+        },
+      }),
+    }),
     TypeOrmModule.forFeature([Post, MetaOption]),
   ],
 })

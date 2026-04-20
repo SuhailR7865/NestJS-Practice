@@ -3,17 +3,19 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './providers/posts.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostDto } from './dtos/create-post.dto';
 import { PatchPostDto } from './dtos/patch-post.dto';
 import { GetPostsDto } from './dtos/get-post.dto';
+import { AccessTokenGuard } from 'src/auth/guards/access-token/access-token.guard';
+import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 
 @Controller('posts')
 @ApiTags('Posts')
@@ -26,11 +28,12 @@ export class PostsController {
   ) {}
 
   /*
-   * GET localhost:3000/posts/:userId
+   * GET localhost:3000/posts
    */
-  @Get('/:userId?')
+  @UseGuards(AccessTokenGuard)
+  @Get()
   public getPosts(
-    @Param('userId') userId: string,
+    @ActiveUser('sub') userId: number,
     @Query() postQuery: GetPostsDto,
   ) {
     return this.postsService.findAll(postQuery, userId);
