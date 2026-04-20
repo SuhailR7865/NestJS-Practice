@@ -16,7 +16,22 @@ export class GoogleAuthenticationController {
 
   @Post()
   @HttpCode(HttpStatus.OK)
-  authenticate(@Body() googleTokenDto: GoogleTokenDto) {
-    return this.googleAuthenticationService.authenticate(googleTokenDto);
+  async authenticate(@Body() googleTokenDto: GoogleTokenDto) {
+    console.log('[GoogleAuthController] Endpoint hit', {
+      tokenLength: googleTokenDto?.token?.length ?? 0,
+    });
+
+    const response =
+      await this.googleAuthenticationService.authenticate(googleTokenDto);
+
+    console.log('[GoogleAuthController] Response shape to frontend', {
+      keys: Object.keys(response),
+      userId: response.userId,
+      email: response.email,
+      hasAccessToken: Boolean(response.accessToken),
+      hasRefreshToken: Boolean(response.refreshToken),
+    });
+
+    return response;
   }
 }

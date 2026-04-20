@@ -1,5 +1,6 @@
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Module, forwardRef } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 
 import { AuthController } from './auth.controller';
 import { AuthService } from './providers/auth.service';
@@ -25,6 +26,17 @@ import jwtConfig from './config/jwt.config';
   imports: [
     forwardRef(() => UsersModule),
     ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync({
+      imports: [ConfigModule.forFeature(jwtConfig)],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get('jwt.secret'),
+        signOptions: {
+          audience: configService.get('jwt.audience'),
+          issuer: configService.get('jwt.issuer'),
+        },
+      }),
+    }),
   ],
   exports: [AuthService, HashingProvider],
 })

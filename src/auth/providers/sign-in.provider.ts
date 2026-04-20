@@ -23,8 +23,16 @@ export class SignInProvider {
   ) {}
 
   public async signIn(signInDto: SignInDto) {
+    console.log('[SignInProvider] signIn called', {
+      email: signInDto.email,
+    });
+
     // find user by email ID
     let user = await this.usersService.findOneByEmail(signInDto.email);
+    console.log('[SignInProvider] User lookup complete', {
+      userId: user.id,
+      email: user.email,
+    });
     // Throw exception if user is not found
     // Above | Taken care by the findInByEmail method
 
@@ -36,6 +44,9 @@ export class SignInProvider {
         signInDto.password,
         user.password,
       );
+      console.log('[SignInProvider] Password comparison complete', {
+        isEqual,
+      });
     } catch (error) {
       throw new RequestTimeoutException(error, {
         description: 'Could not compare the password',
@@ -43,13 +54,22 @@ export class SignInProvider {
     }
 
     if (!isEqual) {
+      console.log('[SignInProvider] Invalid password');
       throw new UnauthorizedException('Password does not match');
     }
 
-    return {
+    const response = {
       message: 'Sign in successful',
       userId: user.id,
       email: user.email,
     };
+
+    console.log('[SignInProvider] Returning sign-in response shape', {
+      keys: Object.keys(response),
+      userId: response.userId,
+      email: response.email,
+    });
+
+    return response;
   }
 }
