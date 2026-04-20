@@ -45,6 +45,37 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
+## Environment variables
+
+Add these values in your `.env` file:
+
+```bash
+DATABASE_PORT=
+DATABASE_PASSWORD=
+DATABASE_HOST=
+DATABASE_NAME=
+DATABASE_USER=
+PROFILE_API_KEY=
+JWT_SECRET=
+JWT_TOKEN_AUDIENCE=
+JWT_TOKEN_ISSUER=
+JWT_ACCESS_TOKEN_TTL=3600
+JWT_REFRESH_TOKEN_TTL=86400
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+```
+
+## Google authentication endpoint
+
+- Backend endpoint: `POST /auth/google-authentication`
+- Request body:
+
+```json
+{
+  "token": "GOOGLE_ID_TOKEN_FROM_FRONTEND"
+}
+```
+
 ## Test
 
 ```bash

@@ -18,9 +18,9 @@ export class MetaOption {
 
   @Column({
     type: 'json',
-    nullable: false,
+    nullable: true,
   })
-  metaValue: string;
+  metaValue?: string;
 
   @CreateDateColumn()
   createDate: Date;

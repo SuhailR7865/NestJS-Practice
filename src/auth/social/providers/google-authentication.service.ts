@@ -1,4 +1,5 @@
 import {
+  InternalServerErrorException,
   Inject,
   Injectable,
   OnModuleInit,
@@ -29,6 +30,13 @@ export class GoogleAuthenticationService implements OnModuleInit {
   onModuleInit() {
     const clientId = this.jwtConfiguration.googleClientId;
     const clientSecret = this.jwtConfiguration.googleClientSecret;
+
+    if (!clientId || !clientSecret) {
+      throw new InternalServerErrorException(
+        'Google OAuth configuration is missing',
+      );
+    }
+
     this.oauthClient = new OAuth2Client(clientId, clientSecret);
   }
 
@@ -37,26 +45,44 @@ export class GoogleAuthenticationService implements OnModuleInit {
       // Verify the Google Token Sent By User
       const loginTicket = await this.oauthClient.verifyIdToken({
         idToken: googleTokenDto.token,
+        audience: this.jwtConfiguration.googleClientId,
       });
+      const payload = loginTicket.getPayload();
+
+      if (!payload) {
+        throw new UnauthorizedException('Invalid Google token payload');
+      }
+
       // Extract the payload from Google Token
       const {
         email,
         sub: googleId,
         given_name: firstName,
         family_name: lastName,
-      } = loginTicket.getPayload();
+        email_verified: emailVerified,
+      } = payload;
+
+      if (!emailVerified || !email || !googleId) {
+        throw new UnauthorizedException('Google account is not eligible');
+      }
+
       // Find the user in the database using the googleId
       let user = await this.usersService.findOneByGoogleId(googleId);
 
       // If user id found generate the tokens
       if (!user) {
-        // If not create a new user and generate the tokens
-        user = await this.usersService.createGoogleUser({
-          email: email,
-          firstName: firstName,
-          lastName: lastName,
-          googleId: googleId,
-        });
+        // Reuse account if it already exists with same email.
+        try {
+          user = await this.usersService.findOneByEmail(email);
+        } catch {
+          // If not create a new user and generate the tokens.
+          user = await this.usersService.createGoogleUser({
+            email,
+            firstName: firstName ?? 'Google',
+            lastName: lastName ?? '',
+            googleId,
+          });
+        }
       }
 
       return {

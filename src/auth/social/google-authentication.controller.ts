@@ -1,5 +1,5 @@
 import { GoogleAuthenticationService } from './providers/google-authentication.service';
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { GoogleTokenDto } from './dtos/google-token.dto';
 import { Auth } from '../decorators/auth.decorator';
 import { AuthType } from '../enums/auth-type.enum';
@@ -15,6 +15,7 @@ export class GoogleAuthenticationController {
   ) {}
 
   @Post()
+  @HttpCode(HttpStatus.OK)
   authenticate(@Body() googleTokenDto: GoogleTokenDto) {
     return this.googleAuthenticationService.authenticate(googleTokenDto);
   }

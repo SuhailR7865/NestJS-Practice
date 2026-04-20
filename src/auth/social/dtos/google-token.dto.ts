@@ -1,6 +1,7 @@
-import { IsNotEmpty, MaxLength } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class GoogleTokenDto {
   @IsNotEmpty()
+  @IsString()
   token: string;
 }
