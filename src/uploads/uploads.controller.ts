@@ -1,4 +1,4 @@
-import { ApiHeaders, ApiOperation } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiHeaders, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   Controller,
   Post,
@@ -13,6 +13,7 @@ import { AuthType } from 'src/auth/enums/auth-type.enum';
 
 @Auth(AuthType.None)
 @Controller('uploads')
+@ApiTags('Uploads')
 export class UploadsController {
   constructor(
     /**
@@ -29,6 +30,23 @@ export class UploadsController {
   ])
   @ApiOperation({
     summary: `Upload a new image to the server`,
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+      required: ['file'],
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'File uploaded successfully',
   })
   @Post('file')
   public uploadFile(@UploadedFile() file: Express.Multer.File) {
