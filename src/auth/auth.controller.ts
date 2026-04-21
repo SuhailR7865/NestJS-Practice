@@ -3,6 +3,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 import { AuthService } from './providers/auth.service';
 import { SignInDto } from './dtos/signin.dto';
+import { RefreshTokenDto } from './dtos/refresh-token.dto';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -49,5 +50,38 @@ export class AuthController {
   })
   public signIn(@Body() signInDto: SignInDto) {
     return this.authService.signIn(signInDto);
+  }
+
+  @Post('refresh-tokens')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get a new access token using refresh token',
+  })
+  @ApiBody({
+    type: RefreshTokenDto,
+    examples: {
+      default: {
+        summary: 'Refresh token request',
+        value: {
+          refreshToken: 'eyJhbGciOi...',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Access token refreshed successfully',
+    schema: {
+      example: {
+        apiVersion: '1',
+        data: {
+          message: 'Tokens refreshed successfully',
+          accessToken: 'eyJhbGciOi...',
+        },
+      },
+    },
+  })
+  public refreshTokens(@Body() refreshTokenDto: RefreshTokenDto) {
+    return this.authService.refreshTokens(refreshTokenDto);
   }
 }
